@@ -16,9 +16,8 @@
 package io.github.swagger2markup.cli;
 
 import io.airlift.airline.*;
-import io.github.swagger2markup.Swagger2MarkupConfig;
-import io.github.swagger2markup.Swagger2MarkupConverter;
-import io.github.swagger2markup.builder.Swagger2MarkupConfigBuilder;
+import io.github.swagger2markup.OpenAPI2MarkupConverter;
+import io.github.swagger2markup.config.builder.OpenAPI2MarkupConfigBuilder;
 import io.github.swagger2markup.utils.URIUtils;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -63,27 +62,12 @@ public class Application implements Runnable{
 
     public void run() {
 
-        Swagger2MarkupConfig swagger2MarkupConfig = null;
-        if(StringUtils.isNotBlank(configFile)) {
-            Configurations configs = new Configurations();
-            Configuration config;
-            try {
-                config = configs.properties(configFile);
-            } catch (ConfigurationException e) {
-                throw new IllegalArgumentException("Failed to read configFile", e);
-            }
-            swagger2MarkupConfig = new Swagger2MarkupConfigBuilder(config).build();
-        }
-        Swagger2MarkupConverter.Builder converterBuilder = Swagger2MarkupConverter.from(URIUtils.create(swaggerInput));
-        if(swagger2MarkupConfig != null){
-            converterBuilder.withConfig(swagger2MarkupConfig);
-        }
-        Swagger2MarkupConverter converter = converterBuilder.build();
+        OpenAPI2MarkupConverter.Builder converterBuilder = OpenAPI2MarkupConverter.from(URIUtils.create(swaggerInput));
 
         if(StringUtils.isNotBlank(outputFile)){
-            converter.toFile(Paths.get(outputFile).toAbsolutePath());
+            converterBuilder.build().toFile(Paths.get(outputFile).toAbsolutePath());
         }else if (StringUtils.isNotBlank(outputDir)){
-            converter.toFolder(Paths.get(outputDir).toAbsolutePath());
+            converterBuilder.build().toFolder(Paths.get(outputDir).toAbsolutePath());
         }else {
             throw new IllegalArgumentException("Either outputFile or outputDir option must be used");
         }
